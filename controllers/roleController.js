@@ -3,9 +3,6 @@ const { Snowflake } = require("@theinternetfolks/snowflake");
 const { Role } = require("../models/roleModel");
 const { Success, Error } = require("../utils/response");
 
-// "total": 2,
-//       "pages": 1,
-//       "page": 1
 
 async function getAllRole(req, res) {
   try {

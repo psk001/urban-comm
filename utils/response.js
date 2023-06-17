@@ -6,9 +6,13 @@ class Success {
 }
 
 class Error {
-  constructor(content) {
-    this.status = false;
-    this.content = content;
+  constructor(message, code, params) {
+    this.status = false
+    this.errors= {
+      'params': params,
+      'message': message,
+      'code': code
+    }
   }
 }
 

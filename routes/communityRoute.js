@@ -10,13 +10,13 @@ const {
   getJoinedCommunity,
 } = require("../controllers/communityController");
 
-// router.get("/", auth, getAllCommunity);
+router.get("/", getAllCommunity);
 
-// router.get("/:id/members", auth, getAllCommunityMembers);
+router.get("/:id/members", auth, getAllCommunityMembers);
 
 router.get("/me/owner", auth, getOwnedCommunity);
 
-// router.get("/me/member", auth, getJoinedCommunity);
+router.get("/me/member", auth, getJoinedCommunity);
 
 router.post("/", auth, createCommunity);
 
