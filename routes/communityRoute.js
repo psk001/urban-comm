@@ -12,7 +12,7 @@ const {
 
 router.get("/", getAllCommunity);
 
-router.get("/:id/members", auth, getAllCommunityMembers);
+router.get("/:id/members", getAllCommunityMembers);
 
 router.get("/me/owner", auth, getOwnedCommunity);
 

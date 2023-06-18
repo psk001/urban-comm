@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const {Snowflake}= require('@theinternetfolks/snowflake');
+const { Snowflake } = require("@theinternetfolks/snowflake");
 
 const { User } = require("../models/userModel");
 
@@ -11,7 +11,15 @@ async function signupUser(req, res) {
     let user = await User.findOne({ email: email });
 
     if (user) {
-      return res.status(400).send(new Error("Email already in use"));
+      return res
+        .status(400)
+        .send(
+          new Error(
+            "User with this email address already exists.",
+            "RESOURCE_EXISTS",
+            "email"
+          )
+        );
     }
 
     const passwordHash = bcrypt.hashSync(password, 5);
@@ -52,11 +60,25 @@ async function signinUser(req, res) {
     let user = await User.findOne({ email: email });
 
     if (!user) {
-      return res.status(404).send(new Error("User does not exist"));
+      return res
+        .status(404)
+        .send(
+          new Error(
+            "Please provide a valid email address.",
+            "INVALID_INPUT",
+            "email"
+          )
+        );
     }
 
     if (!bcrypt.compareSync(password, user.password)) {
-      return res.send(new Error("Incorrect email or password"));
+      return res.send(
+        new Error(
+          "The credentials you provided are invalid.",
+          "INVALID_CREDENTIALS",
+          "password"
+        )
+      );
     }
 
     const { id, name, created_at } = user;

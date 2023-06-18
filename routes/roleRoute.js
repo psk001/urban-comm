@@ -8,7 +8,7 @@ const {
 } = require("../controllers/roleController")
 
 
-router.get("/", auth, getAllRole);
+router.get("/", getAllRole);
 
 router.post("/", createRole);
 

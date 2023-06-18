@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { auth } = require("../middlewares/authMiddleware");
+const {
+  checkAddMember,
+  checkDeleteMember
+}= require('../middlewares/roleMiddleware');
 
 const {
   addMember,
@@ -8,9 +12,9 @@ const {
 } = require("../controllers/memberController")
 
 
-router.get("/", auth, addMember);
+router.post("/", [auth, checkAddMember], addMember);
 
-router.post("/:id", auth, removeMember);
+router.delete("/:id", auth, removeMember);
 
 
 module.exports = router;

@@ -1,9 +1,10 @@
 const { Snowflake } = require("@theinternetfolks/snowflake");
 
-const { Community } = require("../models/communityModel");
 const { User } = require("../models/userModel");
+const { Community } = require("../models/communityModel");
 const { Member } = require("../models/memberModel");
 const { Success, Error } = require("../utils/response");
+const { Role } = require("../models/roleModel");
 
 async function getAllCommunity(req, res) {
   try {
@@ -132,22 +133,6 @@ async function getOwnedCommunity(req, res) {
       .select("-_id -__v")
       .lean();
 
-    for (let i = 0; i < community.length; i++) {
-      let element = { ...community[i] };
-
-      const id = element.owner;
-      delete element["owner"];
-
-      const { name } = await User.findOne({ id: id }).select("name").lean();
-
-      element.owner = {
-        id,
-        name,
-      };
-
-      community[i] = element;
-    }
-
     const roleResponseObject = {
       meta: {
         total: totalCommunityCount,
@@ -180,15 +165,16 @@ async function getJoinedCommunity(req, res) {
       .select("community")
       .lean();
 
+      console.log(joinedCommunity)
     const joinedCommunityList = [];
     for (let i = 0; i < joinedCommunity.length; i++) {
-      let communityId = joinedCommunity[i];
+      let {community: communityId} = joinedCommunity[i];
 
       const community = await Community.findOne({ id: communityId })
         .select("-_id -__v")
         .lean();
 
-      const ownerId = element.owner;
+      const ownerId = community.owner;
       delete community["owner"];
 
       const { name } = await User.findOne({ id: ownerId })
@@ -196,7 +182,7 @@ async function getJoinedCommunity(req, res) {
         .lean();
 
       community.owner = {
-        id,
+        id: communityId,
         name,
       };
 
@@ -225,12 +211,14 @@ async function createCommunity(req, res) {
 
     const { name } = req.body;
 
+    // check if community by a same slug exists
     let community = await Community.findOne({ slug: name });
 
     if (community) {
       return res.send(new Error("Community already exists"));
     }
 
+    // creating new community
     community = new Community({
       id: Snowflake.generate(),
       name,
@@ -240,6 +228,19 @@ async function createCommunity(req, res) {
 
     await community.save();
 
+    // adding current user as community admin 
+    const {id: ownerRoleId}= await Role.findOne({name:"Community Admin"}).select('id').lean();
+
+    const member= new Member({
+      id: Snowflake.generate(),
+      community: community.id,
+      role: ownerRoleId,
+      user: userId
+    })
+
+    await member.save();
+
+    // creating response object
     const { id, slug, created_at, updated_at } = community;
 
     const communityResponseObject = {
