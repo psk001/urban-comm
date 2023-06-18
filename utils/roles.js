@@ -5,13 +5,15 @@ const COMMUNITY_ADMIN = "Community Admin";
 const COMMUNITY_MODERATOR = "Community Moderator";
 
 async function getRole(user, community) {
-  const {role: roleId} = await Member.findOne({ user: user, community: community })
+  const member = await Member.findOne({ user: user, community: community })
     .select("role")
     .lean();
 
-  console.log('role data', roleId);
+  if (!member) {
+    return false;
+  }
 
-  const {name} = await Role.findOne({ id: roleId }).select("name").lean();
+  const { name } = await Role.findOne({ id: roleId }).select("name").lean();
 
   return name;
 }
@@ -19,5 +21,5 @@ async function getRole(user, community) {
 module.exports = {
   COMMUNITY_ADMIN,
   COMMUNITY_MODERATOR,
-  getRole
+  getRole,
 };

@@ -60,7 +60,7 @@ async function getAllCommunityMembers(req, res) {
     const pageSize = process.env.PAGE_SIZE;
     const pageNumber = parseInt(req.query["page"]) || 1;
 
-    const totalMemberCount = await Member.countDocuments();
+    const totalMemberCount = await Member.countDocuments({ community: communityId });
 
     const skipDocuments = (pageNumber - 1) * pageSize;
 
@@ -92,7 +92,7 @@ async function getAllCommunityMembers(req, res) {
         .select("name")
         .lean();
 
-      element.user = {
+      element.role = {
         id: roleId,
         name: roleName,
       };
@@ -123,7 +123,7 @@ async function getOwnedCommunity(req, res) {
     const pageSize = process.env.PAGE_SIZE;
     const pageNumber = parseInt(req.query["page"]) || 1;
 
-    const totalCommunityCount = await Community.countDocuments();
+    const totalCommunityCount = await Community.countDocuments({owner: userId});
 
     const skipDocuments = (pageNumber - 1) * pageSize;
 
@@ -165,10 +165,10 @@ async function getJoinedCommunity(req, res) {
       .select("community")
       .lean();
 
-      console.log(joinedCommunity)
+
     const joinedCommunityList = [];
     for (let i = 0; i < joinedCommunity.length; i++) {
-      let {community: communityId} = joinedCommunity[i];
+      let { community: communityId } = joinedCommunity[i];
 
       const community = await Community.findOne({ id: communityId })
         .select("-_id -__v")
@@ -201,7 +201,7 @@ async function getJoinedCommunity(req, res) {
     return res.send(new Success(communityResponseObject));
   } catch (error) {
     console.error(error.message);
-    return res.status(400).send(new Error("Could not create community"));
+    return res.status(400).send(new Error("Could not get joined community"));
   }
 }
 
@@ -228,15 +228,17 @@ async function createCommunity(req, res) {
 
     await community.save();
 
-    // adding current user as community admin 
-    const {id: ownerRoleId}= await Role.findOne({name:"Community Admin"}).select('id').lean();
+    // adding current user as community admin
+    const { id: ownerRoleId } = await Role.findOne({ name: "Community Admin" })
+      .select("id")
+      .lean();
 
-    const member= new Member({
+    const member = new Member({
       id: Snowflake.generate(),
       community: community.id,
       role: ownerRoleId,
-      user: userId
-    })
+      user: userId,
+    });
 
     await member.save();
 

@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { auth } = require("../middlewares/authMiddleware");
+
+const {
+  validateCreateRole
+}= require('../middlewares/payloadValidationMiddleware')
 
 const {
   createRole,
@@ -10,7 +13,7 @@ const {
 
 router.get("/", getAllRole);
 
-router.post("/", createRole);
+router.post("/", validateCreateRole, createRole);
 
 
 module.exports = router;

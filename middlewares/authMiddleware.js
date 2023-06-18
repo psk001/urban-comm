@@ -24,7 +24,9 @@ const auth = (req, res, next) => {
     req.user = data;
     next();
   } catch (err) {
-    return res.status(401).send(new Error("Please authenticate using a valid token"));
+    return res
+      .status(401)
+      .send(new Error("Please authenticate using a valid token"));
   }
 };
 

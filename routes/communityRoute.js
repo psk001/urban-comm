@@ -3,6 +3,10 @@ const router = express.Router();
 const { auth } = require("../middlewares/authMiddleware");
 
 const {
+  validateCreateCommunity
+}= require('../middlewares/payloadValidationMiddleware')
+
+const {
   createCommunity,
   getAllCommunity,
   getAllCommunityMembers,
@@ -18,6 +22,6 @@ router.get("/me/owner", auth, getOwnedCommunity);
 
 router.get("/me/member", auth, getJoinedCommunity);
 
-router.post("/", auth, createCommunity);
+router.post("/", [auth, validateCreateCommunity],  createCommunity);
 
 module.exports = router;

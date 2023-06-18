@@ -4,6 +4,7 @@ const { Snowflake } = require("@theinternetfolks/snowflake");
 const { User } = require("../models/userModel");
 
 const { Success, Error } = require("../utils/response");
+const { generateGeneralErrorObject } = require("../utils/errorMessages");
 
 async function signupUser(req, res) {
   try {
@@ -11,15 +12,14 @@ async function signupUser(req, res) {
     let user = await User.findOne({ email: email });
 
     if (user) {
-      return res
-        .status(400)
-        .send(
-          new Error(
-            "User with this email address already exists.",
-            "RESOURCE_EXISTS",
-            "email"
-          )
-        );
+      const error = [
+        generateGeneralErrorObject(
+          "User with this email address already exists.",
+          "RESOURCE_EXISTS",
+          "email"
+        ),
+      ];
+      return res.status(400).send(new Error(error));
     }
 
     const passwordHash = bcrypt.hashSync(password, 5);
@@ -60,25 +60,25 @@ async function signinUser(req, res) {
     let user = await User.findOne({ email: email });
 
     if (!user) {
-      return res
-        .status(404)
-        .send(
-          new Error(
-            "Please provide a valid email address.",
-            "INVALID_INPUT",
-            "email"
-          )
-        );
+      const error = [
+        generateGeneralErrorObject(
+          "Please provide a valid email address.",
+          "INVALID_INPUT",
+          "email"
+        ),
+      ];
+      return res.status(400).send(new Error(error));
     }
 
     if (!bcrypt.compareSync(password, user.password)) {
-      return res.send(
-        new Error(
+      const error = [
+        generateGeneralErrorObject(
           "The credentials you provided are invalid.",
           "INVALID_CREDENTIALS",
           "password"
-        )
-      );
+        ),
+      ];
+      return res.status(400).send(new Error(error));
     }
 
     const { id, name, created_at } = user;
